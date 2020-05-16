@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "create-elm-app": "^4.2.22",
+    "elm-format": "^0.8.3"
+  },
+  "scripts": {
+    "build-css": "node-sass-chokidar src/styles/index.scss src/main.css",
+    "watch-css": "npm run build-css && node-sass-chokidar src/styles/index.scss src/main.css --watch --recursive",
+    "api": "elm-graphql http://localhost:3000/graphql --base Athena",
+    "build": "node-sass-chokidar src/styles/index.scss src/main.css && elm-app build"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "node-sass-chokidar": "^1.4.0",
+    "normalize.css": "^8.0.1"
+  }
+}
