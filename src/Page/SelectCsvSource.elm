@@ -108,9 +108,14 @@ update msg model =
                     url
             in
             ( DocumentLoading prevUrls url
-            , Http.get
-                { url = url_
+            , Http.request
+                { method = "get"
+                , headers = [ Http.header "x-requested-with" "prompts" ]
+                , url = "https://cors-anywhere.herokuapp.com/" ++ url_
+                , body = Http.emptyBody
                 , expect = Http.expectString (RemoteData.fromResult >> GotResponse (Url url_))
+                , timeout = Nothing
+                , tracker = Nothing
                 }
             )
                 |> noPrompts
