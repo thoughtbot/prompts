@@ -1,4 +1,4 @@
-module ParseCsv exposing (CsvError, ParsedPrompt, parse)
+module ParseCsv exposing (CsvError(..), ParsedPrompt, parse)
 
 import Csv
 import List.Extra as List
@@ -8,7 +8,7 @@ import Parser
 
 
 type CsvError
-    = ParseError (List Parser.DeadEnd)
+    = ParseError String
     | MissingPromptIndex
     | MissingCategoryIndex
     | MissingCategoryAndPromptIndex
@@ -27,7 +27,7 @@ parse : String -> Result CsvError (Nonempty ParsedPrompt)
 parse result =
     case Csv.parse result of
         Err e ->
-            Err <| ParseError e
+            Err <| ParseError <| Parser.deadEndsToString e
 
         Ok { headers, records } ->
             let

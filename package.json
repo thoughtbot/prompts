@@ -1,7 +1,8 @@
 {
   "devDependencies": {
     "create-elm-app": "^4.2.22",
-    "elm-format": "^0.8.3"
+    "elm-format": "^0.8.3",
+    "elm-test": "^0.19.1-revision5"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/styles/index.scss src/main.css",
