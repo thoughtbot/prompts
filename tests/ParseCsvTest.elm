@@ -1,7 +1,7 @@
 module ParseCsvTest exposing (all)
 
 import Expect
-import NonemptyExtra
+import List.Nonempty as Nonempty
 import ParseCsv
 import Test exposing (..)
 
@@ -13,49 +13,41 @@ all =
             \_ ->
                 Expect.equal
                     (Ok
-                        (NonemptyExtra.appendNonEmpty
-                            { categories =
-                                [ "work" ]
+                        (Nonempty.fromElement
+                            { categories = []
                             , context = Nothing
                             , options = []
                             , question = "What are you working on?"
                             }
-                            []
                         )
                     )
-                    (ParseCsv.parse "Category,Prompt\nwork,What are you working on?")
+                    (ParseCsv.parse "Prompt\nWhat are you working on?")
+        , test "errors when the prompt is empty" <|
+            \_ ->
+                Expect.equal
+                    (Err <| ParseCsv.DecodeError "empty string")
+                    (ParseCsv.parse "Prompt\n ")
         , test "errors when no prompts are provided" <|
             \_ ->
                 Expect.equal
                     (Err ParseCsv.NoPromptRows)
-                    (ParseCsv.parse "Category,Prompt")
+                    (ParseCsv.parse "Prompt")
         , test "errors without a Prompt column" <|
             \_ ->
                 Expect.equal
                     (Err ParseCsv.MissingPromptIndex)
-                    (ParseCsv.parse "Category")
-        , test "errors without a Category column" <|
-            \_ ->
-                Expect.equal
-                    (Err ParseCsv.MissingCategoryIndex)
-                    (ParseCsv.parse "Prompt")
-        , test "errors without a Category and Prompt column" <|
-            \_ ->
-                Expect.equal
-                    (Err ParseCsv.MissingCategoryAndPromptIndex)
-                    (ParseCsv.parse "Context,Options")
+                    (ParseCsv.parse "Category\nwork")
         , test "works with richer data" <|
             \_ ->
                 Expect.equal
                     (Ok
-                        (NonemptyExtra.appendNonEmpty
+                        (Nonempty.fromElement
                             { categories =
                                 [ "work", "fun" ]
                             , context = Just "Imagine coming out of a fun meeting."
                             , options = [ "pre-COVID ice cream parties", "working on a project" ]
                             , question = "Did you talk about {}?"
                             }
-                            []
                         )
                     )
                     (ParseCsv.parse "Category,Context,Options,Prompt\n\"work,fun\",Imagine coming out of a fun meeting.,\"pre-COVID ice cream parties,working on a project\",Did you talk about {}?")

@@ -1,17 +1,14 @@
 module ParseCsv exposing (CsvError(..), ParsedPrompt, parse)
 
-import Csv
-import List.Extra as List
+import Csv.Decode as Decode exposing (Decoder)
 import List.Nonempty as Nonempty exposing (Nonempty)
 import NonemptyExtra as Nonempty
-import Parser
 
 
 type CsvError
     = ParseError String
+    | DecodeError String
     | MissingPromptIndex
-    | MissingCategoryIndex
-    | MissingCategoryAndPromptIndex
     | NoPromptRows
 
 
@@ -25,94 +22,75 @@ type alias ParsedPrompt =
 
 parse : String -> Result CsvError (Nonempty ParsedPrompt)
 parse result =
-    case Csv.parse result of
-        Err e ->
-            Err <| ParseError <| Parser.deadEndsToString e
-
-        Ok { headers, records } ->
-            let
-                categoryIndex =
-                    List.findIndex ((==) "Category") headers
-
-                promptIndex =
-                    List.findIndex ((==) "Prompt") headers
-
-                contextIndex =
-                    List.findIndex ((==) "Context") headers
-
-                optionsIndex =
-                    List.findIndex ((==) "Options") headers
-            in
-            case ( categoryIndex, promptIndex ) of
-                ( Just cIndex, Just pIndex ) ->
-                    records
-                        |> List.filterMap
-                            (\row ->
-                                case List.getAt pIndex row of
-                                    Nothing ->
-                                        Nothing
-
-                                    Just promptValue ->
-                                        Just
-                                            { categories = List.getAt cIndex row
-                                            , prompt = promptValue
-                                            , context = contextIndex |> Maybe.andThen (\v -> List.getAt v row)
-                                            , options = optionsIndex |> Maybe.andThen (\v -> List.getAt v row)
-                                            }
-                            )
-                        |> buildParsedPrompts
-                        |> (\res ->
-                                case res of
-                                    first :: rest ->
-                                        Nonempty.appendNonEmpty first rest
-                                            |> Ok
-
-                                    _ ->
-                                        Err NoPromptRows
-                           )
-
-                ( Just _, _ ) ->
-                    Err MissingPromptIndex
-
-                ( _, Just _ ) ->
-                    Err MissingCategoryIndex
-
-                ( _, _ ) ->
-                    Err MissingCategoryAndPromptIndex
+    Decode.decodeCsv
+        Decode.FieldNamesFromFirstRow
+        parsedPromptDecoder
+        result
+        |> Result.mapError decodeError
+        |> Result.andThen (Nonempty.fromList >> Result.fromMaybe NoPromptRows)
 
 
-buildParsedPrompts :
-    List
-        { categories : Maybe String
-        , prompt : String
-        , context : Maybe String
-        , options : Maybe String
-        }
-    -> List ParsedPrompt
-buildParsedPrompts results =
+decodeError : Decode.Error -> CsvError
+decodeError error =
+    case error of
+        Decode.ParsingError problem ->
+            ParseError "parsing failed"
+
+        Decode.DecodingError { row, problem } ->
+            case problem of
+                Decode.ExpectedField "Prompt" ->
+                    MissingPromptIndex
+
+                Decode.Failure v ->
+                    DecodeError v
+
+                _ ->
+                    DecodeError "decoding failed"
+
+
+nonEmptyString : Decode.Decoder String
+nonEmptyString =
+    Decode.string
+        |> Decode.andThen
+            (\v ->
+                case String.trim v of
+                    "" ->
+                        Decode.fail "empty string"
+
+                    _ ->
+                        Decode.succeed v
+            )
+
+
+parsedPromptDecoder : Decode.Decoder ParsedPrompt
+parsedPromptDecoder =
     let
-        parseContext context =
-            context
-                |> Maybe.andThen
-                    (\input ->
-                        case String.trim input of
-                            "" ->
-                                Nothing
+        optionalString =
+            Decode.blank Decode.string
 
-                            v ->
-                                Just v
-                    )
+        decodeCategory =
+            Decode.oneOf
+                (Decode.field "Category" (Decode.map parseList optionalString))
+                [ Decode.succeed [] ]
 
-        f item acc =
-            acc
-                ++ [ { categories = parseList item.categories
-                     , question = item.prompt
-                     , context = parseContext item.context
-                     , options = parseList item.options
-                     }
-                   ]
+        decodeContext =
+            Decode.oneOf
+                (Decode.field "Context" optionalString)
+                [ Decode.succeed Nothing ]
+
+        decodeOptions =
+            Decode.oneOf
+                (Decode.field "Options" (Decode.map parseList optionalString))
+                [ Decode.succeed [] ]
+
+        decodePrompt =
+            Decode.field "Prompt" nonEmptyString
     in
-    List.foldl f [] results
+    Decode.into ParsedPrompt
+        |> Decode.pipeline decodeCategory
+        |> Decode.pipeline decodeContext
+        |> Decode.pipeline decodeOptions
+        |> Decode.pipeline decodePrompt
 
 
 parseList : Maybe String -> List String
