@@ -111,7 +111,7 @@ update msg model =
             , Http.request
                 { method = "get"
                 , headers = [ Http.header "x-requested-with" "prompts" ]
-                , url = "https://cors-anywhere.herokuapp.com/" ++ url_
+                , url = url_
                 , body = Http.emptyBody
                 , expect = Http.expectString (RemoteData.fromResult >> GotResponse (Url url_))
                 , timeout = Nothing
