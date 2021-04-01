@@ -137,10 +137,10 @@ view model =
                     , text after
                     ]
     in
-    div [ class "prompt" ]
+    div [ class "flex flex-col space-y-8" ]
         [ context
-        , p [ class "main" ] promptQuestion
-        , div [ class "meta" ]
+        , p [ class "text-4xl md:text-6xl md:leading-tight" ] promptQuestion
+        , div [ class "flex flex-col space-y-8 md:flex-row md:space-y-0 md:justify-between md:items-center" ]
             [ categoriesList <| Types.getPromptCategories prompt
             , nextPromptButton
             ]
@@ -149,13 +149,13 @@ view model =
 
 categoriesList : List Types.Category -> Html a
 categoriesList categories =
-    ul [ class "categories" ] <| List.map (\c -> li [] [ text <| Types.categoryValue c ]) categories
+    ul [] <| List.map (\c -> li [ class "text-sm font-sans text-center px-3 py-1 text-black text-opacity-80 bg-yellow-200 rounded-md" ] [ text <| Types.categoryValue c ]) categories
 
 
 nextPromptButton : Html Msg
 nextPromptButton =
-    div [ class "refresh" ]
-        [ button [ onClick Shuffle, tabindex 1 ] [ i [ class "fas fa-sync" ] [] ]
-        , button [ onClick MoveBackward, tabindex 2 ] [ i [ class "fas fa-step-backward" ] [] ]
-        , button [ onClick MoveForward, tabindex 0 ] [ i [ class "fas fa-step-forward" ] [] ]
+    div [ class "flex flex-row justify-between space-x-2 md:justify-end" ]
+        [ button [ class "bg-red-500 text-white px-4 py-3 rounded-md", onClick Shuffle, tabindex 1 ] [ i [ class "fas fa-sync" ] [] ]
+        , button [ class "bg-red-500 text-white px-4 py-3 rounded-md", onClick MoveBackward, tabindex 2 ] [ i [ class "fas fa-step-backward" ] [] ]
+        , button [ class "bg-red-500 text-white px-4 py-3 rounded-md", onClick MoveForward, tabindex 0 ] [ i [ class "fas fa-step-forward" ] [] ]
         ]

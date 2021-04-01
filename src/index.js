@@ -1,5 +1,4 @@
 import '@fortawesome/fontawesome-free/css/all.css';
-import 'normalize.css';
 import './main.css';
 import { Elm } from './Main.elm';
 import * as serviceWorker from './serviceWorker';

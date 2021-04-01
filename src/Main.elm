@@ -81,7 +81,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ] [ viewInner model ]
+    div [ class "dark:bg-gray-800 dark:text-gray-300 h-screen flex content-center justify-center items-center" ] [ div [ class "max-w-sm p-4 sm:max-w-xl md:max-w-3xl lg:max-w-4xl" ] [ viewInner model ] ]
 
 
 viewInner : Model -> Html Msg

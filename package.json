@@ -5,14 +5,29 @@
     "elm-test": "^0.19.1-revision5"
   },
   "scripts": {
-    "build-css": "node-sass-chokidar src/styles/index.scss src/main.css",
-    "watch-css": "npm run build-css && node-sass-chokidar src/styles/index.scss src/main.css --watch --recursive",
-    "api": "elm-graphql http://localhost:3000/graphql --base Athena",
-    "build": "node-sass-chokidar src/styles/index.scss src/main.css && elm-app build"
+    "build": "npm run build:production && elm-app build",
+    "build:production": "cross-env NODE_ENV=production gulp",
+    "build:dev": "cross-env NODE_ENV=development gulp",
+    "dev": "cross-env NODE_ENV=development gulp serve",
+    "start": "npm run dev"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
+    "autoprefixer": "^10.2.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "browser-sync": "^2.26.14",
+    "cross-env": "^7.0.3",
+    "cross-spawn": "^7.0.3",
+    "cssnano": "^4.1.10",
+    "gulp": "^4.0.2",
+    "gulp-postcss": "^9.0.0",
     "node-sass-chokidar": "^1.4.0",
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "postcss": "^8.2.9",
+    "postcss-cli": "^8.3.1",
+    "postcss-import": "^14.0.1",
+    "precss": "^4.0.0",
+    "tailwindcss": "^2.0.4"
   }
 }

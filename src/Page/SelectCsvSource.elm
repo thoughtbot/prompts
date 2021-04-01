@@ -9,7 +9,7 @@ module Page.SelectCsvSource exposing
     )
 
 import Html exposing (..)
-import Html.Attributes exposing (class, for, id, tabindex, type_, value)
+import Html.Attributes exposing (class, for, id, required, tabindex, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import ParseCsv
@@ -164,7 +164,7 @@ view model =
 
         DocumentLoading _ _ ->
             div []
-                [ h2 [] [ text "Loading..." ]
+                [ h2 [ class "text-center text-5xl" ] [ text "Loading..." ]
                 ]
 
         DocumentLoadedSuccessfully _ _ prompts ->
@@ -189,17 +189,23 @@ promptUrlForm urls (Url urlValue) =
         submitBehavior =
             SubmitForm (Url urlValue)
     in
-    div [ class "url-capture" ]
-        [ h2 [] [ text "Welcome to Prompts!" ]
-        , p [] [ text "Prompts is a small tool to help initiate conversations." ]
-        , form [ class "csv-selection", onSubmit submitBehavior ]
+    div [ class "flex flex-col space-y-8" ]
+        [ h2 [ class "text-5xl font-bold lg:text-7xl" ] [ text "Welcome to Prompts!" ]
+        , p [ class "text-3xl lg:text-4xl" ] [ text "Prompts is a small tool to help initiate conversations." ]
+        , form [ class "flex flex-col space-y-2", onSubmit submitBehavior ]
             [ label [ for "url" ] [ text "What's the URL of the CSV you'll be using?" ]
-            , br [] []
-            , input [ type_ "url", id "url", onInput SetUrl, value urlValue ] []
-            , input [ type_ "submit", onClick submitBehavior, value "Submit" ] []
+            , div [ class "flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-2" ]
+                [ input [ class "md:w-3/4 p-2 border border-gray-300 rounded-md text-gray-800", required True, type_ "url", id "url", onInput SetUrl, value urlValue ] []
+                , input [ class "md:w-1/4 p-2", buttonStyles, type_ "submit", value "Submit" ] []
+                ]
             ]
         , previousUrlsList urls
         ]
+
+
+buttonStyles : Attribute a
+buttonStyles =
+    class "bg-red-500 text-white text-opacity-90 shadow-md font-bold rounded-md cursor-pointer font-sans"
 
 
 previousUrlsList : PreviousUrls -> Html Msg
@@ -207,7 +213,7 @@ previousUrlsList (PreviousUrls urls) =
     if List.length urls > 0 then
         section []
             [ h3 [] [ text "Or, view previous CSVs you've loaded" ]
-            , ul [ class "previous-urls" ]
+            , ul [ class "" ]
                 (List.map
                     (\url_ ->
                         let
@@ -233,8 +239,8 @@ successfulPromptsOutcome prompts =
         categoriesCount =
             String.pluralize "category" "categories" (Types.categories prompts |> List.length)
     in
-    div [ class "document-loaded" ]
-        [ h2 [] [ text "Now we're cooking with gas! 🔥🔥🔥" ]
+    div [ class "flex flex-col space-y-8" ]
+        [ h2 [ class "text-5xl" ] [ text "Now we're cooking with gas! 🔥🔥🔥" ]
         , p []
             [ text <|
                 "We were able to load "
@@ -243,7 +249,7 @@ successfulPromptsOutcome prompts =
                     ++ categoriesCount
                     ++ "."
             ]
-        , button [ tabindex 0, onClick Proceed ] [ text "Let's get going!" ]
+        , button [ buttonStyles, class "px-8 py-4 self-center", tabindex 0, onClick Proceed ] [ text "Let's get going!" ]
         ]
 
 

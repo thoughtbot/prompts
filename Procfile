@@ -1,2 +1,2 @@
 web: elm-app start
-scss: yarn run watch-css
+styles: node_modules/.bin/postcss src/styles/main.css -o src/main.css -w
