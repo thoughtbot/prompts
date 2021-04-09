@@ -4,6 +4,18 @@ Prompts is a small application for presenting a list of prompts from CSVs.
 
 This project is bootstrapped with [Create Elm App](https://github.com/halfzebra/create-elm-app).
 
+## Setup
+
+```sh
+bin/setup
+```
+
+## Running the Application
+
+```sh
+heroku local
+```
+
 ## CSV format
 
 * `Category` – Required. Comma-delimited list of categories.
